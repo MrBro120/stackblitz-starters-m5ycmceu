@@ -990,10 +990,9 @@ export default function HomePage() {
         >
           <div
             style={{
-              fontSize:
-                "52px",
-              marginBottom:
-                "10px",
+              display: "flex",
+              justifyContent: "center",
+              marginBottom: "16px",
             }}
           >
             <img
@@ -1002,6 +1001,7 @@ export default function HomePage() {
               width={84}
               height={84}
               style={{
+                display: "block",
                 borderRadius: "20px",
                 boxShadow: "0 8px 24px rgba(0,0,0,0.25)",
               }}
@@ -3517,6 +3517,8 @@ export default function HomePage() {
               "repeat(auto-fit, minmax(220px, 1fr))",
             gap:
               "30px",
+            textAlign:
+              "center",
           }}
         >
           <div>
@@ -3529,6 +3531,7 @@ export default function HomePage() {
               <span
                 style={{
                   display: "inline-flex",
+                  flexDirection: "column",
                   alignItems: "center",
                   gap: "10px",
                 }}
@@ -3536,9 +3539,9 @@ export default function HomePage() {
                 <img
                   src="/logo-icon.svg"
                   alt="House Connect logo"
-                  width={34}
-                  height={34}
-                  style={{ borderRadius: "8px" }}
+                  width={56}
+                  height={56}
+                  style={{ borderRadius: "14px" }}
                 />
                 HOUSE CONNECT
               </span>
