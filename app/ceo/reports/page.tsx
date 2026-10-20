@@ -132,17 +132,13 @@ export default function AdminReportsPage() {
         return;
       }
 
-      const propertyIds = [
-        ...new Set(
+      const propertyIds = Array.from(new Set(
           reportData.map((report) => report.property_id)
-        ),
-      ];
+        ));
 
-      const reporterIds = [
-        ...new Set(
+      const reporterIds = Array.from(new Set(
           reportData.map((report) => report.reporter_id)
-        ),
-      ];
+        ));
 
       // Load properties
       const { data: propertyData, error: propertyError } =
@@ -169,13 +165,11 @@ export default function AdminReportsPage() {
       }
 
       // Get landlord IDs from properties
-      const landlordIds = [
-        ...new Set(
+      const landlordIds = Array.from(new Set(
           (propertyData || [])
             .map((property) => property.landlord_id)
             .filter(Boolean)
-        ),
-      ];
+        ));
 
       let landlordData: any[] = [];
 

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { supabase } from "../../lib/supabase";
@@ -16,6 +16,14 @@ export default function AuthPage() {
   const [phone, setPhone] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+
+  // Open the login form when the link is /auth?mode=login
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    if (params.get("mode") === "login") {
+      setMode("login");
+    }
+  }, []);
 
   const [message, setMessage] = useState("");
   const [error, setError] = useState("");

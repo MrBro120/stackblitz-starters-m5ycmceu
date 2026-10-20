@@ -317,13 +317,11 @@ export default function LandlordPage() {
         return;
       }
   
-      const tenantIds = [
-        ...new Set(
+      const tenantIds = Array.from(new Set(
           requestData
             .map((request) => request.tenant_id)
             .filter(Boolean)
-        ),
-      ];
+        ));
   
       let tenantProfiles: Record<
         string,
@@ -1743,28 +1741,48 @@ export default function LandlordPage() {
               Home
             </Link>
 
-            <button
-              type="button"
-              onClick={
-                handleLogout
-              }
-              style={{
-                padding:
-                  "9px 13px",
-                borderRadius: "8px",
-                border:
-                  "1px solid rgba(255,255,255,0.35)",
-                background:
-                  "transparent",
-                color: "white",
-                fontWeight:
-                  "bold",
-                cursor:
-                  "pointer",
-              }}
-            >
-              Logout
-            </button>
+            {userId ? (
+              <button
+                type="button"
+                onClick={
+                  handleLogout
+                }
+                style={{
+                  padding:
+                    "9px 13px",
+                  borderRadius: "8px",
+                  border:
+                    "1px solid rgba(255,255,255,0.35)",
+                  background:
+                    "transparent",
+                  color: "white",
+                  fontWeight:
+                    "bold",
+                  cursor:
+                    "pointer",
+                }}
+              >
+                Logout
+              </button>
+            ) : (
+              <Link
+                href="/auth?mode=login"
+                style={{
+                  padding:
+                    "9px 16px",
+                  borderRadius: "8px",
+                  background:
+                    "white",
+                  color: "#0B3B75",
+                  fontWeight:
+                    "bold",
+                  textDecoration:
+                    "none",
+                }}
+              >
+                Login / Sign Up
+              </Link>
+            )}
           </div>
         </div>
       </header>
@@ -2067,6 +2085,81 @@ export default function LandlordPage() {
             }}
           >
             {dashboardError}
+          </div>
+        )}
+
+        {!userId && !loadingDashboard && (
+          <div
+            style={{
+              background: "white",
+              border:
+                "1px solid #D9E2EC",
+              borderRadius: "14px",
+              padding: "26px",
+              marginBottom: "20px",
+              textAlign: "center",
+            }}
+          >
+            <div
+              style={{
+                fontSize: "20px",
+                fontWeight: "bold",
+                color: "#0B3B75",
+                marginBottom: "8px",
+              }}
+            >
+              Landlord Login
+            </div>
+
+            <p
+              style={{
+                color: "#475467",
+                margin: "0 0 18px 0",
+              }}
+            >
+              Log in to list your properties,
+              manage photos and respond to
+              tenant viewing requests. New here?
+              Create a free landlord account.
+            </p>
+
+            <div
+              style={{
+                display: "flex",
+                justifyContent: "center",
+                gap: "12px",
+                flexWrap: "wrap",
+              }}
+            >
+              <Link
+                href="/auth?mode=login"
+                style={{
+                  padding: "12px 24px",
+                  borderRadius: "9px",
+                  background: "#0B3B75",
+                  color: "white",
+                  fontWeight: "bold",
+                  textDecoration: "none",
+                }}
+              >
+                Log in
+              </Link>
+
+              <Link
+                href="/auth"
+                style={{
+                  padding: "12px 24px",
+                  borderRadius: "9px",
+                  border:
+                    "1px solid #0B3B75",
+                  color: "#0B3B75",
+                  fontWeight: "bold",
+                  textDecoration: "none",
+                }}
+              >
+                Create landlord account
+              </Link>
+            </div>
           </div>
         )}
 

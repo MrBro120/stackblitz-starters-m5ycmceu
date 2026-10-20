@@ -151,13 +151,11 @@ export default function CEODashboard() {
       return;
     }
 
-    const landlordIds = Array.from(
-      new Set(
+    const landlordIds = Array.from(new Set(
         propertyData.map(
           (property: any) => property.landlord_id
         )
-      )
-    );
+      ));
 
     const { data: profiles, error: profilesError } =
       await supabase

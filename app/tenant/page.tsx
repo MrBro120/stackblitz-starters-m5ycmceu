@@ -379,14 +379,12 @@ export default function TenantPage() {
         return;
       }
 
-      const propertyIds = [
-        ...new Set(
+      const propertyIds = Array.from(new Set(
           requestRows.map(
             (request) =>
               request.property_id
           )
-        ),
-      ];
+        ));
 
       let propertiesForRequests: {
         id: string;
@@ -444,11 +442,9 @@ export default function TenantPage() {
               Boolean(id)
           );
 
-      const uniqueLandlordIds = [
-        ...new Set(
+      const uniqueLandlordIds = Array.from(new Set(
           acceptedLandlordIds
-        ),
-      ];
+        ));
 
       let landlordProfiles: {
         id: string;
