@@ -1,0 +1,19 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128" role="img" aria-label="House Connect logo">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#0B3B75"/>
+      <stop offset="1" stop-color="#1A6BC2"/>
+    </linearGradient>
+  </defs>
+  <rect width="128" height="128" rx="28" fill="url(#bg)"/>
+  <!-- house outline -->
+  <path d="M24 62 L64 28 L104 62" fill="none" stroke="#fff" stroke-width="8" stroke-linecap="round" stroke-linejoin="round"/>
+  <path d="M35 56 V98 H93 V56" fill="none" stroke="#fff" stroke-width="8" stroke-linecap="round" stroke-linejoin="round"/>
+  <!-- connection nodes inside the house -->
+  <line x1="50" y1="84" x2="64" y2="66" stroke="#F5B83D" stroke-width="5" stroke-linecap="round"/>
+  <line x1="78" y1="84" x2="64" y2="66" stroke="#F5B83D" stroke-width="5" stroke-linecap="round"/>
+  <line x1="50" y1="84" x2="78" y2="84" stroke="#F5B83D" stroke-width="5" stroke-linecap="round"/>
+  <circle cx="64" cy="66" r="7" fill="#F5B83D"/>
+  <circle cx="50" cy="84" r="7" fill="#F5B83D"/>
+  <circle cx="78" cy="84" r="7" fill="#F5B83D"/>
+</svg>

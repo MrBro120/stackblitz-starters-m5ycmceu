@@ -870,7 +870,22 @@ export default function HomePage() {
                   "22px",
               }}
             >
-              🏠 HOUSE CONNECT
+              <span
+                style={{
+                  display: "inline-flex",
+                  alignItems: "center",
+                  gap: "10px",
+                }}
+              >
+                <img
+                  src="/logo-icon.svg"
+                  alt="House Connect logo"
+                  width={34}
+                  height={34}
+                  style={{ borderRadius: "8px" }}
+                />
+                HOUSE CONNECT
+              </span>
             </div>
 
             <div
@@ -956,7 +971,7 @@ export default function HomePage() {
       <section
         style={{
           background:
-            "linear-gradient(135deg, #0B3B75 0%, #155AA8 100%)",
+            "linear-gradient(135deg, rgba(11,59,117,0.78) 0%, rgba(21,90,168,0.60) 100%), url('/images/hero.jpg') center/cover, linear-gradient(135deg, #0B3B75 0%, #155AA8 100%)",
           color:
             "white",
           padding:
@@ -981,7 +996,16 @@ export default function HomePage() {
                 "10px",
             }}
           >
-            🏠
+            <img
+              src="/logo-icon.svg"
+              alt="House Connect logo"
+              width={84}
+              height={84}
+              style={{
+                borderRadius: "20px",
+                boxShadow: "0 8px 24px rgba(0,0,0,0.25)",
+              }}
+            />
           </div>
 
           <h1
@@ -3502,7 +3526,22 @@ export default function HomePage() {
                   0,
               }}
             >
-              🏠 HOUSE CONNECT
+              <span
+                style={{
+                  display: "inline-flex",
+                  alignItems: "center",
+                  gap: "10px",
+                }}
+              >
+                <img
+                  src="/logo-icon.svg"
+                  alt="House Connect logo"
+                  width={34}
+                  height={34}
+                  style={{ borderRadius: "8px" }}
+                />
+                HOUSE CONNECT
+              </span>
             </h3>
 
             <p
