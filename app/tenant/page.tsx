@@ -3,6 +3,7 @@
 import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { supabase } from "@/lib/supabase";
+import { getImageUrl as buildImageUrl } from "@/lib/images";
 
 /* =========================================================
    TYPES
@@ -195,13 +196,7 @@ export default function TenantPage() {
       return "";
     }
 
-    const cleanPath = storagePath.replace(/^\/+/, "");
-
-    const { data } = supabase.storage
-      .from(IMAGE_BUCKET)
-      .getPublicUrl(cleanPath);
-
-    return data.publicUrl;
+    return buildImageUrl(storagePath);
   }
 
   async function loadApprovedProperties() {

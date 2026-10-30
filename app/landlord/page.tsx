@@ -3,6 +3,7 @@
 import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { supabase } from "@/lib/supabase";
+import { getImageUrl as buildImageUrl, R2_PREFIX } from "@/lib/images";
 
 type Property = {
   id: string;
@@ -188,11 +189,7 @@ export default function LandlordPage() {
   // ============================================================
 
   function getImageUrl(storagePath: string) {
-    const { data } = supabase.storage
-      .from("property-images")
-      .getPublicUrl(storagePath);
-
-    return data.publicUrl;
+    return buildImageUrl(storagePath);
   }
 
   // ============================================================
@@ -800,6 +797,63 @@ export default function LandlordPage() {
   }
 
   // ============================================================
+  // PHOTO STORAGE HELPERS (Cloudflare R2 + older Supabase photos)
+  // ============================================================
+
+  async function getAccessToken() {
+    const {
+      data: { session },
+    } = await supabase.auth.getSession();
+
+    if (!session?.access_token) {
+      throw new Error(
+        "Your session has expired. Please log in again."
+      );
+    }
+
+    return session.access_token;
+  }
+
+  async function deleteStoredPhotos(paths: string[]) {
+    const r2Paths = paths.filter((path) =>
+      path.startsWith(R2_PREFIX)
+    );
+    const oldPaths = paths.filter(
+      (path) => !path.startsWith(R2_PREFIX)
+    );
+
+    if (r2Paths.length > 0) {
+      const accessToken = await getAccessToken();
+
+      const response = await fetch("/api/images/delete", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${accessToken}`,
+        },
+        body: JSON.stringify({ storagePaths: r2Paths }),
+      });
+
+      if (!response.ok) {
+        const data = await response.json().catch(() => ({}));
+        throw new Error(
+          data.error || "Could not remove the photo file."
+        );
+      }
+    }
+
+    if (oldPaths.length > 0) {
+      const { error } = await supabase.storage
+        .from("property-images")
+        .remove(oldPaths);
+
+      if (error) {
+        throw new Error(error.message);
+      }
+    }
+  }
+
+  // ============================================================
   // UPLOAD PROPERTY PHOTOS
   // ============================================================
 
@@ -832,48 +886,44 @@ export default function LandlordPage() {
       ) {
         const photo = photos[index];
 
-        const originalExtension =
-          photo.file.name
-            .split(".")
-            .pop()
-            ?.toLowerCase() || "jpg";
+        const accessToken = await getAccessToken();
 
-        const safeExtension = [
-          "jpg",
-          "jpeg",
-          "png",
-          "webp",
-        ].includes(originalExtension)
-          ? originalExtension
-          : "jpg";
+        // 1. Ask our server for a short-lived upload link
+        const linkResponse = await fetch("/api/images/upload-url", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${accessToken}`,
+          },
+          body: JSON.stringify({
+            propertyId,
+            contentType: photo.file.type,
+            size: photo.file.size,
+          }),
+        });
 
-        const fileName =
-          `${crypto.randomUUID()}.${safeExtension}`;
+        const linkData = await linkResponse.json();
 
-        const storagePath =
-          `${propertyId}/${fileName}`;
-
-        const { error: uploadError } =
-          await supabase.storage
-            .from("property-images")
-            .upload(
-              storagePath,
-              photo.file,
-              {
-                cacheControl: "3600",
-                upsert: false,
-                contentType: photo.file.type,
-              }
-            );
-
-        if (uploadError) {
-          console.error(
-            "Photo upload error:",
-            uploadError
+        if (!linkResponse.ok) {
+          throw new Error(
+            linkData.error || "Could not prepare the photo upload."
           );
+        }
+
+        const storagePath: string = linkData.storagePath;
+
+        // 2. Send the photo straight to Cloudflare
+        const uploadResponse = await fetch(linkData.uploadUrl, {
+          method: "PUT",
+          headers: { "Content-Type": photo.file.type },
+          body: photo.file,
+        });
+
+        if (!uploadResponse.ok) {
+          console.error("Photo upload error:", uploadResponse.status);
 
           throw new Error(
-            uploadError.message
+            "The photo could not be uploaded. Please try again."
           );
         }
 
@@ -920,14 +970,9 @@ export default function LandlordPage() {
       );
 
       if (uploadedStoragePaths.length > 0) {
-        const { error: cleanupError } =
-          await supabase.storage
-            .from("property-images")
-            .remove(
-              uploadedStoragePaths
-            );
-
-        if (cleanupError) {
+        try {
+          await deleteStoredPhotos(uploadedStoragePaths);
+        } catch (cleanupError) {
           console.error(
             "Storage cleanup error:",
             cleanupError
@@ -1370,12 +1415,13 @@ export default function LandlordPage() {
     setActionMessage("");
 
     try {
-      const { error: storageError } =
-        await supabase.storage
-          .from("property-images")
-          .remove([
-            image.storage_path,
-          ]);
+      let storageError: unknown = null;
+
+      try {
+        await deleteStoredPhotos([image.storage_path]);
+      } catch (deleteError) {
+        storageError = deleteError;
+      }
 
       if (storageError) {
         console.error(

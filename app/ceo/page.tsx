@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { supabase } from "@/lib/supabase";
+import { getImageUrl as buildImageUrl } from "@/lib/images";
 
 type Property = {
   id: string;
@@ -322,15 +323,7 @@ export default function CEODashboard() {
   */
 
   function getPropertyImageUrl(storagePath: string) {
-    const cleanPath = storagePath.replace(/^\/+/, "");
-
-    const {
-      data: { publicUrl },
-    } = supabase.storage
-      .from(IMAGE_BUCKET)
-      .getPublicUrl(cleanPath);
-
-    return publicUrl;
+    return buildImageUrl(storagePath);
   }
 
   async function openPropertyReview(

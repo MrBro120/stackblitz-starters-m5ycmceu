@@ -4,6 +4,7 @@ import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { supabase } from "../lib/supabase";
+import { getImageUrl } from "@/lib/images";
 
 type Property = {
   id: string;
@@ -168,18 +169,12 @@ export default function HomePage() {
       > = {};
 
       (data || []).forEach((image) => {
-        const {
-          data: publicUrlData,
-        } = supabase.storage
-          .from("property-images")
-          .getPublicUrl(
-            image.storage_path
-          );
-
         const imageWithUrl: PropertyImage = {
           ...image,
           public_url:
-            publicUrlData.publicUrl,
+            getImageUrl(
+              image.storage_path
+            ),
         };
 
         if (
