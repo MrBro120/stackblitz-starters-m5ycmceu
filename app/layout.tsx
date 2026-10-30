@@ -6,7 +6,7 @@ const inter = Inter({ subsets: ['latin'] });
 
 // When you connect your .com domain, change this address to it,
 // for example: https://www.yourdomain.com
-const siteUrl = 'https://stackblitz-starters-m5ycmceu.vercel.app';
+const siteUrl = 'https://www.houseconnect.site';
 
 export const metadata: Metadata = {
   metadataBase: new URL(siteUrl),
