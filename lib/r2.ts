@@ -104,13 +104,22 @@ export function presignUrl(input: PresignInput): string {
   return `https://${input.host}${canonicalPath}?${canonicalQuery}&X-Amz-Signature=${signature}`;
 }
 
-export function getR2Config() {
-  const accountId = process.env.R2_ACCOUNT_ID;
-  const accessKeyId = process.env.R2_ACCESS_KEY_ID;
-  const secretAccessKey = process.env.R2_SECRET_ACCESS_KEY;
-  const bucket = process.env.R2_BUCKET || "property-images";
+// Your Cloudflare account ID is not a secret (it is in your dashboard address).
+const DEFAULT_ACCOUNT_ID = "20ee7ef1381a11d28f281eebb8366e3a";
+const DEFAULT_BUCKET = "property-images";
 
-  if (!accountId || !accessKeyId || !secretAccessKey) {
+export function getR2Config() {
+  // Trim hidden spaces / line breaks that often come with copy-paste.
+  const envAccountId = (process.env.R2_ACCOUNT_ID || "").trim();
+  const accountId = /^[0-9a-f]{32}$/i.test(envAccountId)
+    ? envAccountId.toLowerCase()
+    : DEFAULT_ACCOUNT_ID;
+
+  const accessKeyId = (process.env.R2_ACCESS_KEY_ID || "").trim();
+  const secretAccessKey = (process.env.R2_SECRET_ACCESS_KEY || "").trim();
+  const bucket = (process.env.R2_BUCKET || "").trim() || DEFAULT_BUCKET;
+
+  if (!accessKeyId || !secretAccessKey) {
     throw new Error("Image storage is not configured on the server.");
   }
 

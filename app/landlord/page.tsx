@@ -58,6 +58,11 @@ type EditForm = {
 const MAX_PHOTOS = 6;
 const MAX_FILE_SIZE = 5 * 1024 * 1024;
 
+// Photos go to Cloudflare R2 first. If R2 is unavailable, the photo is saved
+// in Supabase Storage instead, so landlords are never blocked.
+// Set NEXT_PUBLIC_IMAGE_STORAGE=supabase in Vercel to skip R2 completely.
+const USE_R2_STORAGE = process.env.NEXT_PUBLIC_IMAGE_STORAGE !== "supabase";
+
 const PROPERTY_TYPES = [
   "House",
   "Apartment",
@@ -886,45 +891,89 @@ export default function LandlordPage() {
       ) {
         const photo = photos[index];
 
-        const accessToken = await getAccessToken();
+        let storagePath = "";
+        let storedInR2 = false;
 
-        // 1. Ask our server for a short-lived upload link
-        const linkResponse = await fetch("/api/images/upload-url", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${accessToken}`,
-          },
-          body: JSON.stringify({
-            propertyId,
-            contentType: photo.file.type,
-            size: photo.file.size,
-          }),
-        });
+        if (USE_R2_STORAGE) {
+          try {
+            const accessToken = await getAccessToken();
 
-        const linkData = await linkResponse.json();
+            // 1. Ask our server for a short-lived upload link
+            const linkResponse = await fetch("/api/images/upload-url", {
+              method: "POST",
+              headers: {
+                "Content-Type": "application/json",
+                Authorization: `Bearer ${accessToken}`,
+              },
+              body: JSON.stringify({
+                propertyId,
+                contentType: photo.file.type,
+                size: photo.file.size,
+              }),
+            });
 
-        if (!linkResponse.ok) {
-          throw new Error(
-            linkData.error || "Could not prepare the photo upload."
-          );
+            const linkData = await linkResponse.json();
+
+            if (!linkResponse.ok) {
+              throw new Error(
+                linkData.error || "Could not prepare the photo upload."
+              );
+            }
+
+            storagePath = linkData.storagePath;
+
+            // 2. Send the photo straight to Cloudflare
+            const uploadResponse = await fetch(linkData.uploadUrl, {
+              method: "PUT",
+              headers: { "Content-Type": photo.file.type },
+              body: photo.file,
+            });
+
+            if (!uploadResponse.ok) {
+              console.error("Photo upload error:", uploadResponse.status);
+
+              throw new Error(
+                "The photo could not be uploaded. Please try again."
+              );
+            }
+
+            storedInR2 = true;
+          } catch (r2Error) {
+            console.warn(
+              "Cloudflare upload failed, using Supabase instead:",
+              r2Error
+            );
+            storagePath = "";
+          }
         }
 
-        const storagePath: string = linkData.storagePath;
+        if (!storedInR2) {
+          const originalExtension =
+            photo.file.name.split(".").pop()?.toLowerCase() || "jpg";
 
-        // 2. Send the photo straight to Cloudflare
-        const uploadResponse = await fetch(linkData.uploadUrl, {
-          method: "PUT",
-          headers: { "Content-Type": photo.file.type },
-          body: photo.file,
-        });
+          const safeExtension = ["jpg", "jpeg", "png", "webp"].includes(
+            originalExtension
+          )
+            ? originalExtension
+            : "jpg";
 
-        if (!uploadResponse.ok) {
-          console.error("Photo upload error:", uploadResponse.status);
+          const fileName = `${crypto.randomUUID()}.${safeExtension}`;
 
-          throw new Error(
-            "The photo could not be uploaded. Please try again."
-          );
+          storagePath = `${propertyId}/${fileName}`;
+
+          const { error: uploadError } = await supabase.storage
+            .from("property-images")
+            .upload(storagePath, photo.file, {
+              cacheControl: "3600",
+              upsert: false,
+              contentType: photo.file.type,
+            });
+
+          if (uploadError) {
+            console.error("Photo upload error:", uploadError);
+
+            throw new Error(uploadError.message);
+          }
         }
 
         uploadedStoragePaths.push(
