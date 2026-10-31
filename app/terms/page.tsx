@@ -97,7 +97,10 @@ export default function TermsPage() {
       <h2>11. Governing law</h2>
       <p>These terms are governed by the laws of Uganda.</p>
 
-  
+      <p style={{ background: "#FFF6E0", padding: 12, borderRadius: 8 }}>
+        This page is a general template and should be reviewed by a lawyer
+        before relying on it.
+      </p>
     </LegalPage>
   );
 }

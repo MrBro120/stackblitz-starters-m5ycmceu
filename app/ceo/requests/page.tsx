@@ -1,6 +1,13 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import {
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+  type CSSProperties,
+} from "react";
 import Link from "next/link";
 import { supabase } from "@/lib/supabase";
 import {
@@ -46,7 +53,7 @@ type Card = RequestRow & {
   landlord?: ProfileRow;
 };
 
-const pill = (bg: string, color: string): React.CSSProperties => ({
+const pill = (bg: string, color: string): CSSProperties => ({
   background: bg,
   color,
   borderRadius: 999,
@@ -55,7 +62,7 @@ const pill = (bg: string, color: string): React.CSSProperties => ({
   fontWeight: 800,
 });
 
-const actionBtn = (bg: string, color: string): React.CSSProperties => ({
+const actionBtn = (bg: string, color: string): CSSProperties => ({
   background: bg,
   color,
   border: "none",

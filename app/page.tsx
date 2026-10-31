@@ -88,6 +88,12 @@ export default function HomePage() {
   const [selectedImageIndex, setSelectedImageIndex] =
     useState(0);
 
+  const [showFullPhoto, setShowFullPhoto] =
+    useState(false);
+
+  const [touchStartX, setTouchStartX] =
+    useState<number | null>(null);
+
   // ==================================================
   // VIEWING REQUEST
   // ==================================================
@@ -379,6 +385,8 @@ export default function HomePage() {
 
     setSelectedImageIndex(0);
 
+    setShowFullPhoto(false);
+
     setShowViewingForm(false);
 
     setRequestMessage("");
@@ -404,6 +412,8 @@ export default function HomePage() {
     setSelectedProperty(null);
 
     setSelectedImageIndex(0);
+
+    setShowFullPhoto(false);
 
     setShowViewingForm(false);
 
@@ -2610,6 +2620,11 @@ export default function HomePage() {
                               ?.caption ||
                             selectedProperty.title
                           }
+                          onClick={() =>
+                            setShowFullPhoto(
+                              true
+                            )
+                          }
                           style={{
                             width:
                               "100%",
@@ -2619,8 +2634,46 @@ export default function HomePage() {
                               "cover",
                             display:
                               "block",
+                            cursor:
+                              "zoom-in",
                           }}
                         />
+
+                        <button
+                          type="button"
+                          onClick={() =>
+                            setShowFullPhoto(
+                              true
+                            )
+                          }
+                          aria-label="View photo full screen"
+                          style={{
+                            position:
+                              "absolute",
+                            left:
+                              "12px",
+                            bottom:
+                              "12px",
+                            background:
+                              "rgba(0,0,0,0.7)",
+                            color:
+                              "white",
+                            border:
+                              "none",
+                            padding:
+                              "8px 12px",
+                            borderRadius:
+                              "7px",
+                            fontSize:
+                              "12px",
+                            fontWeight:
+                              "bold",
+                            cursor:
+                              "pointer",
+                          }}
+                        >
+                          ⤢ Full screen
+                        </button>
 
                         <div
                           style={{
@@ -2798,6 +2851,138 @@ export default function HomePage() {
                                 />
                               </button>
                             )
+                          )}
+                        </div>
+                      )}
+
+                      {showFullPhoto && (
+                        <div
+                          tabIndex={-1}
+                          ref={(el) => {
+                            if (el) el.focus();
+                          }}
+                          onKeyDown={(e) => {
+                            if (e.key === "Escape") setShowFullPhoto(false);
+                            if (e.key === "ArrowRight") nextImage();
+                            if (e.key === "ArrowLeft") previousImage();
+                          }}
+                          onTouchStart={(e) =>
+                            setTouchStartX(e.touches[0].clientX)
+                          }
+                          onTouchEnd={(e) => {
+                            if (touchStartX === null) return;
+                            const dx =
+                              e.changedTouches[0].clientX - touchStartX;
+                            setTouchStartX(null);
+                            if (dx < -50) nextImage();
+                            if (dx > 50) previousImage();
+                          }}
+                          style={{
+                            position: "fixed",
+                            inset: 0,
+                            zIndex: 5000,
+                            background: "rgba(0,0,0,0.95)",
+                            display: "flex",
+                            alignItems: "center",
+                            justifyContent: "center",
+                            outline: "none",
+                          }}
+                        >
+                          <img
+                            src={currentImage?.public_url}
+                            alt={
+                              currentImage?.caption ||
+                              selectedProperty.title
+                            }
+                            style={{
+                              maxWidth: "100%",
+                              maxHeight: "100%",
+                              objectFit: "contain",
+                              display: "block",
+                              touchAction: "pinch-zoom",
+                            }}
+                          />
+
+                          <button
+                            type="button"
+                            onClick={() => setShowFullPhoto(false)}
+                            aria-label="Close full screen"
+                            style={{
+                              position: "absolute",
+                              top: "16px",
+                              right: "16px",
+                              width: "46px",
+                              height: "46px",
+                              borderRadius: "50%",
+                              border: "none",
+                              background: "rgba(255,255,255,0.2)",
+                              color: "white",
+                              fontSize: "26px",
+                              cursor: "pointer",
+                            }}
+                          >
+                            ✕
+                          </button>
+
+                          <div
+                            style={{
+                              position: "absolute",
+                              top: "24px",
+                              left: "16px",
+                              color: "white",
+                              fontWeight: "bold",
+                              fontSize: "14px",
+                            }}
+                          >
+                            {selectedImageIndex + 1} / {images.length}
+                          </div>
+
+                          {images.length > 1 && (
+                            <>
+                              <button
+                                type="button"
+                                onClick={previousImage}
+                                aria-label="Previous photo"
+                                style={{
+                                  position: "absolute",
+                                  left: "14px",
+                                  top: "50%",
+                                  transform: "translateY(-50%)",
+                                  width: "48px",
+                                  height: "48px",
+                                  borderRadius: "50%",
+                                  border: "none",
+                                  background: "rgba(255,255,255,0.2)",
+                                  color: "white",
+                                  fontSize: "30px",
+                                  cursor: "pointer",
+                                }}
+                              >
+                                ‹
+                              </button>
+
+                              <button
+                                type="button"
+                                onClick={nextImage}
+                                aria-label="Next photo"
+                                style={{
+                                  position: "absolute",
+                                  right: "14px",
+                                  top: "50%",
+                                  transform: "translateY(-50%)",
+                                  width: "48px",
+                                  height: "48px",
+                                  borderRadius: "50%",
+                                  border: "none",
+                                  background: "rgba(255,255,255,0.2)",
+                                  color: "white",
+                                  fontSize: "30px",
+                                  cursor: "pointer",
+                                }}
+                              >
+                                ›
+                              </button>
+                            </>
                           )}
                         </div>
                       )}

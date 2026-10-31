@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState, type CSSProperties } from "react";
 import Link from "next/link";
 import { supabase } from "@/lib/supabase";
 import { getImageUrl as buildImageUrl } from "@/lib/images";
@@ -120,6 +120,9 @@ export default function TenantPage() {
 
   const [selectedImageIndex, setSelectedImageIndex] =
     useState(0);
+
+  const [showFullPhoto, setShowFullPhoto] = useState(false);
+  const [touchStartX, setTouchStartX] = useState<number | null>(null);
 
   /* =======================================================
      VIEWING REQUEST MODAL
@@ -1109,6 +1112,7 @@ export default function TenantPage() {
   function closeProperty() {
     setSelectedProperty(null);
     setSelectedImageIndex(0);
+    setShowFullPhoto(false);
   }
 
   function openRequestModal(
@@ -3638,6 +3642,9 @@ export default function TenantPage() {
                     alt={
                       selectedProperty.title
                     }
+                    onClick={() =>
+                      setShowFullPhoto(true)
+                    }
                     style={{
                       width:
                         "100%",
@@ -3647,8 +3654,138 @@ export default function TenantPage() {
                         "cover",
                       display:
                         "block",
+                      cursor:
+                        "zoom-in",
                     }}
                   />
+
+                  <button
+                    type="button"
+                    onClick={() => setShowFullPhoto(true)}
+                    aria-label="View photo full screen"
+                    style={{
+                      position: "absolute",
+                      left: "12px",
+                      bottom: "12px",
+                      background: "rgba(0,0,0,0.7)",
+                      color: "white",
+                      border: "none",
+                      padding: "8px 12px",
+                      borderRadius: "7px",
+                      fontSize: "12px",
+                      fontWeight: "bold",
+                      cursor: "pointer",
+                    }}
+                  >
+                    ⤢ Full screen
+                  </button>
+
+                  {showFullPhoto && (() => {
+                    const imgs = selectedProperty.images;
+                    const go = (d: number) =>
+                      setSelectedImageIndex(
+                        (c) => (c + d + imgs.length) % imgs.length
+                      );
+                    const circle: CSSProperties = {
+                      position: "absolute",
+                      width: "48px",
+                      height: "48px",
+                      borderRadius: "50%",
+                      border: "none",
+                      background: "rgba(255,255,255,0.2)",
+                      color: "white",
+                      fontSize: "28px",
+                      cursor: "pointer",
+                    };
+                    return (
+                      <div
+                        tabIndex={-1}
+                        ref={(el) => {
+                          if (el) el.focus();
+                        }}
+                        onKeyDown={(e) => {
+                          if (e.key === "Escape") setShowFullPhoto(false);
+                          if (e.key === "ArrowRight") go(1);
+                          if (e.key === "ArrowLeft") go(-1);
+                        }}
+                        onTouchStart={(e) =>
+                          setTouchStartX(e.touches[0].clientX)
+                        }
+                        onTouchEnd={(e) => {
+                          if (touchStartX === null) return;
+                          const dx =
+                            e.changedTouches[0].clientX - touchStartX;
+                          setTouchStartX(null);
+                          if (dx < -50) go(1);
+                          if (dx > 50) go(-1);
+                        }}
+                        style={{
+                          position: "fixed",
+                          inset: 0,
+                          zIndex: 5000,
+                          background: "rgba(0,0,0,0.95)",
+                          display: "flex",
+                          alignItems: "center",
+                          justifyContent: "center",
+                          outline: "none",
+                        }}
+                      >
+                        <img
+                          src={getImageUrl(
+                            imgs[selectedImageIndex]?.storage_path
+                          )}
+                          alt={selectedProperty.title}
+                          style={{
+                            maxWidth: "100%",
+                            maxHeight: "100%",
+                            objectFit: "contain",
+                            display: "block",
+                            touchAction: "pinch-zoom",
+                          }}
+                        />
+                        <button
+                          type="button"
+                          onClick={() => setShowFullPhoto(false)}
+                          aria-label="Close full screen"
+                          style={{ ...circle, top: "16px", right: "16px" }}
+                        >
+                          ✕
+                        </button>
+                        <div
+                          style={{
+                            position: "absolute",
+                            top: "24px",
+                            left: "16px",
+                            color: "white",
+                            fontWeight: "bold",
+                            fontSize: "14px",
+                          }}
+                        >
+                          {selectedImageIndex + 1} / {imgs.length}
+                        </div>
+                        {imgs.length > 1 && (
+                          <>
+                            <button
+                              type="button"
+                              onClick={() => go(-1)}
+                              aria-label="Previous photo"
+                              style={{ ...circle, left: "14px", top: "50%", transform: "translateY(-50%)" }}
+                            >
+                              ‹
+                            </button>
+                            <button
+                              type="button"
+                              onClick={() => go(1)}
+                              aria-label="Next photo"
+                              style={{ ...circle, right: "14px", top: "50%", transform: "translateY(-50%)" }}
+                            >
+                              ›
+                            </button>
+                          </>
+                        )}
+                      </div>
+                    );
+                  })()}
 
                   {selectedProperty
                     .images
