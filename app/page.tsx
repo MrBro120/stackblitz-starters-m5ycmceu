@@ -955,6 +955,20 @@ export default function HomePage() {
             >
               Tenant Account
             </Link>
+
+            <Link
+              href="/auth?mode=login"
+              style={{
+                color: "#0B3B75",
+                background: "white",
+                fontWeight: "bold",
+                textDecoration: "none",
+                padding: "9px 14px",
+                borderRadius: "7px",
+              }}
+            >
+              Landlord Login
+            </Link>
           </nav>
         </div>
       </header>
@@ -970,9 +984,55 @@ export default function HomePage() {
           color:
             "white",
           padding:
-            "55px 20px 60px",
+            "55px 20px 130px",
+          position: "relative",
+          overflow: "hidden",
         }}
       >
+        <svg
+          aria-hidden="true"
+          viewBox="0 0 1440 190"
+          preserveAspectRatio="xMidYMax slice"
+          style={{
+            position: "absolute",
+            left: 0,
+            right: 0,
+            bottom: 0,
+            width: "100%",
+            height: "150px",
+            pointerEvents: "none",
+          }}
+        >
+          <circle cx="1180" cy="60" r="38" fill="#F5B83D" opacity="0.22" />
+          <path
+            d="M0 150 Q240 90 480 135 T960 120 T1440 135 L1440 190 L0 190Z"
+            fill="#155AA8"
+            opacity="0.55"
+          />
+          <path
+            d="M0 170 Q300 130 620 160 T1200 150 T1440 160 L1440 190 L0 190Z"
+            fill="#0B3B75"
+            opacity="0.85"
+          />
+          {[120, 330, 540, 760, 980, 1190, 1350].map((x, i) => {
+            const h = 34 + ((i * 13) % 22);
+            const w = 50 + ((i * 7) % 18);
+            const y = 176 - h;
+            return (
+              <g key={x}>
+                <rect x={x} y={y} width={w} height={h} fill="#082B54" />
+                <polygon
+                  points={`${x - 5},${y} ${x + w / 2},${y - 20} ${x + w + 5},${y}`}
+                  fill="#082B54"
+                />
+                <rect x={x + 10} y={y + 10} width="9" height="11" fill="#F5B83D" />
+                <rect x={x + w - 19} y={y + 10} width="9" height="11" fill="#F5B83D" opacity="0.7" />
+              </g>
+            );
+          })}
+          <rect x="0" y="176" width="1440" height="14" fill="#082B54" />
+        </svg>
+
         <div
           style={{
             maxWidth:
@@ -981,6 +1041,8 @@ export default function HomePage() {
               "auto",
             textAlign:
               "center",
+            position: "relative",
+            zIndex: 1,
           }}
         >
           <div
@@ -3595,6 +3657,31 @@ export default function HomePage() {
                 }}
               >
                 List Property
+              </Link>
+            </p>
+
+            <p>
+              <Link
+                href="/auth?mode=login"
+                style={{ color: "white" }}
+              >
+                Landlord Login
+              </Link>
+            </p>
+          </div>
+
+          <div>
+            <h4>LEGAL</h4>
+
+            <p>
+              <Link href="/terms" style={{ color: "white" }}>
+                Terms of Service
+              </Link>
+            </p>
+
+            <p>
+              <Link href="/privacy" style={{ color: "white" }}>
+                Privacy Policy
               </Link>
             </p>
           </div>

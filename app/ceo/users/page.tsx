@@ -2,6 +2,7 @@
 
 import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
+import AdminRequestsLink from "@/components/AdminRequestsLink";
 import { supabase } from "@/lib/supabase";
 
 type UserProfile = {
@@ -318,6 +319,8 @@ export default function AdminUsersPage() {
             >
               👑 {adminName}
             </span>
+
+            <AdminRequestsLink />
 
             <Link
               href="/ceo"

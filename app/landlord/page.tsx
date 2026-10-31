@@ -56,11 +56,52 @@ type EditForm = {
 };
 
 const MAX_PHOTOS = 6;
-const MAX_FILE_SIZE = 5 * 1024 * 1024;
+const MAX_FILE_SIZE = 12 * 1024 * 1024;
 
 // Photos go to Cloudflare R2 first. If R2 is unavailable, the photo is saved
 // in Supabase Storage instead, so landlords are never blocked.
 // Set NEXT_PUBLIC_IMAGE_STORAGE=supabase in Vercel to skip R2 completely.
+// Shrinks a photo before upload: max 1600 px on the longest side, JPEG.
+// Makes uploads much faster on slow networks and saves storage space.
+// If anything goes wrong, the original photo is uploaded instead.
+async function compressPhoto(file: File): Promise<File> {
+  try {
+    const bitmap = await createImageBitmap(file);
+    const maxSide = 1600;
+    const scale = Math.min(1, maxSide / Math.max(bitmap.width, bitmap.height));
+    const width = Math.max(1, Math.round(bitmap.width * scale));
+    const height = Math.max(1, Math.round(bitmap.height * scale));
+
+    const canvas = document.createElement("canvas");
+    canvas.width = width;
+    canvas.height = height;
+
+    const context = canvas.getContext("2d");
+
+    if (!context) {
+      return file;
+    }
+
+    context.fillStyle = "#ffffff";
+    context.fillRect(0, 0, width, height);
+    context.drawImage(bitmap, 0, 0, width, height);
+
+    const blob = await new Promise<Blob | null>((resolve) =>
+      canvas.toBlob(resolve, "image/jpeg", 0.82)
+    );
+
+    if (!blob || blob.size >= file.size) {
+      return file;
+    }
+
+    return new File([blob], file.name.replace(/\.[^.]+$/, "") + ".jpg", {
+      type: "image/jpeg",
+    });
+  } catch {
+    return file;
+  }
+}
+
 const USE_R2_STORAGE = process.env.NEXT_PUBLIC_IMAGE_STORAGE !== "supabase";
 
 const PROPERTY_TYPES = [
@@ -645,7 +686,7 @@ export default function LandlordPage() {
 
       if (file.size > MAX_FILE_SIZE) {
         setPhotoError(
-          `${file.name} is larger than 5 MB. Please choose a smaller image.`
+          `${file.name} is larger than 12 MB. Please choose a smaller image.`
         );
         continue;
       }
@@ -733,7 +774,7 @@ export default function LandlordPage() {
 
       if (file.size > MAX_FILE_SIZE) {
         setAdditionalPhotoError(
-          `${file.name} is larger than 5 MB.`
+          `${file.name} is larger than 12 MB.`
         );
         continue;
       }
@@ -889,7 +930,12 @@ export default function LandlordPage() {
         index < photos.length;
         index++
       ) {
-        const photo = photos[index];
+        const originalPhoto = photos[index];
+
+        const photo = {
+          ...originalPhoto,
+          file: await compressPhoto(originalPhoto.file),
+        };
 
         let storagePath = "";
         let storedInR2 = false;
@@ -4512,7 +4558,7 @@ export default function LandlordPage() {
                       }}
                     >
                       JPG, PNG or WEBP •
-                      Maximum 5 MB per
+                      Maximum 12 MB per
                       photo •{" "}
                       {
                         selectedPhotos.length

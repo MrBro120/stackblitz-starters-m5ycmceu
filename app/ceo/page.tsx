@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
+import AdminRequestsLink from "@/components/AdminRequestsLink";
 import { supabase } from "@/lib/supabase";
 import { getImageUrl as buildImageUrl } from "@/lib/images";
 
@@ -834,6 +835,8 @@ export default function CEODashboard() {
               alignItems: "center",
             }}
           >
+            <AdminRequestsLink />
+
             <Link
               href="/"
               style={{

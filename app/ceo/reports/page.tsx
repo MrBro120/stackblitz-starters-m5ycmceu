@@ -2,6 +2,7 @@
 
 import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
+import AdminRequestsLink from "@/components/AdminRequestsLink";
 import { supabase } from "../../../lib/supabase";
 
 type Report = {
@@ -526,6 +527,8 @@ export default function AdminReportsPage() {
               flexWrap: "wrap",
             }}
           >
+            <AdminRequestsLink />
+
             <Link
               href="/ceo"
               style={{

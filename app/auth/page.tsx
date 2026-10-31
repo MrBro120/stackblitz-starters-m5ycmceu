@@ -382,6 +382,28 @@ export default function AuthPage() {
                 ? "CREATE LANDLORD ACCOUNT"
                 : "LOG IN"}
             </button>
+
+            {mode === "register" && (
+              <p
+                style={{
+                  fontSize: "13px",
+                  color: "#627D98",
+                  textAlign: "center",
+                  lineHeight: "1.5",
+                  margin: "12px 0 0",
+                }}
+              >
+                By creating an account you agree to our{" "}
+                <a href="/terms" target="_blank" rel="noreferrer">
+                  Terms of Service
+                </a>{" "}
+                and{" "}
+                <a href="/privacy" target="_blank" rel="noreferrer">
+                  Privacy Policy
+                </a>
+                .
+              </p>
+            )}
           </form>
 
           <div

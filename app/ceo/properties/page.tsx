@@ -2,6 +2,7 @@
 
 import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
+import AdminRequestsLink from "@/components/AdminRequestsLink";
 import { supabase } from "@/lib/supabase";
 
 type Property = {
@@ -387,6 +388,8 @@ export default function AdminPropertiesPage() {
           </div>
 
           <div style={{ display: "flex", gap: 10 }}>
+            <AdminRequestsLink />
+
             <Link href="/ceo" style={navButton}>
               Dashboard
             </Link>
